@@ -25,6 +25,8 @@ sim = mp.Simulation(cell_size=cell,
                     sources=sources,
                     resolution=resolution)
 
+sim.use_output_directory()
+
 sim.run(mp.at_beginning(mp.output_epsilon),
         mp.to_appended("ez", mp.at_every(0.6, mp.output_efield_z)),
         until=200)
