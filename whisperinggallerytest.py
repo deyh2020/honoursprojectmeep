@@ -4,6 +4,10 @@ import meep as mp
 import numpy as np
 import matplotlib.pyplot as plt
 
+# Characteristic lengthscale
+
+a = 1  # micrometers
+
 cell = mp.Vector3(16, 16, 0)
 
 geometry = [mp.Cylinder(material=mp.Medium(epsilon=12),
@@ -11,13 +15,16 @@ geometry = [mp.Cylinder(material=mp.Medium(epsilon=12),
                         radius=6,
                         height=mp.inf)]
 
-sources = [mp.Source(mp.ContinuousSource(frequency=0.15),
+# Source Wavelength
+wvln = 1.538  # micrometers
+
+sources = [mp.Source(mp.ContinuousSource(frequency=1/wvln),
                      component=mp.Ez,
                      center=mp.Vector3(-6, 0))]
 
 pml_layers = [mp.PML(1.0)]
 
-resolution = 10
+resolution = 20
 
 sim = mp.Simulation(cell_size=cell,
                     boundary_layers=pml_layers,
