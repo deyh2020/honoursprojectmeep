@@ -18,7 +18,7 @@ geometry = [mp.Cylinder(material=mp.Medium(epsilon=12),
 # Source Wavelength
 wvln = 1.538  # micrometers
 
-sources = [mp.Source(mp.ContinuousSource(frequency=1/wvln),
+sources = [mp.Source(mp.ContinuousSource(frequency=a/wvln),
                      component=mp.Ez,
                      center=mp.Vector3(-6, 0))]
 
