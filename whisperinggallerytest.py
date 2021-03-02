@@ -19,7 +19,7 @@ pml_layers = [mp.PML(dpml)]
 
 # Size of resonator and waveguide
 r = 6
-sep = 0.1
+sep = 0
 w = 0.5
 pad = 2
 
