@@ -5,27 +5,34 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Characteristic lengthscale
-
 a = 1  # micrometers
 
-cell = mp.Vector3(16, 16, 0)
+resolution = 20  # pixels/um
 
-# Whispering gallery mode
+sx = 16  # size of cell in X direction
+sy = 16  # size of cell in Y direction
+cell = mp.Vector3(sx, sy, 0)
+
+# Creating perfectly matched layers
+dpml = 1.0
+pml_layers = [mp.PML(dpml)]
+
+# Size of resonator and waveguide
+r = 6
+
+# Whispering gallery resonator
 geometry = [mp.Cylinder(material=mp.Medium(epsilon=12),
                         center=mp.Vector3(),
-                        radius=6,
+                        radius=r,
                         height=mp.inf)]
 
 # Source Wavelength
 wvln = 1.538  # micrometers
 
-sources = [mp.Source(mp.ContinuousSource(frequency=a/wvln),
+# Scattering source
+sources = [mp.Source(mp.ContinuousSource(frequency=a / wvln),
                      component=mp.Ez,
                      center=mp.Vector3(-6, 0))]
-
-pml_layers = [mp.PML(1.0)]
-
-resolution = 20
 
 sim = mp.Simulation(cell_size=cell,
                     boundary_layers=pml_layers,
