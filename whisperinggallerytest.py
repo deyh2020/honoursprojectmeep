@@ -19,8 +19,8 @@ pml_layers = [mp.PML(dpml)]
 
 # Size of resonator and waveguide
 r = 6
-sep = 0.5
-w = 1
+sep = 0.1
+w = 0.5
 pad = 2
 
 geometry = [mp.Cylinder(material=mp.Medium(epsilon=12),
@@ -29,7 +29,7 @@ geometry = [mp.Cylinder(material=mp.Medium(epsilon=12),
                         height=mp.inf),  # Whispering gallery resonator
             mp.Block(mp.Vector3(w, mp.inf, mp.inf),
                      material=mp.Medium(epsilon=12),
-                     center=mp.Vector3(-(r + sep + w / 2), 0, 0)
+                     center=mp.Vector3(-(r + sep + w/2), 0, 0)
                      )
             ]
 
@@ -37,9 +37,11 @@ geometry = [mp.Cylinder(material=mp.Medium(epsilon=12),
 wvln = 1.538  # micrometers
 
 # Scattering source
-sources = [mp.Source(mp.ContinuousSource(frequency=a / wvln),
+sources = [mp.Source(mp.ContinuousSource(frequency=a/wvln, width=w),
                      component=mp.Ez,
-                     center=mp.Vector3(-6, 0))]
+                     center=mp.Vector3(-(r + sep + w/2), -sy/2 + pad),
+                     size=mp.Vector3(w, 0))
+           ]
 
 sim = mp.Simulation(cell_size=cell,
                     boundary_layers=pml_layers,
