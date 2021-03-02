@@ -9,7 +9,7 @@ a = 1  # micrometers
 
 resolution = 20  # pixels/um
 
-sx = 16  # size of cell in X direction
+sx = 20  # size of cell in X direction
 sy = 16  # size of cell in Y direction
 cell = mp.Vector3(sx, sy, 0)
 
@@ -19,12 +19,19 @@ pml_layers = [mp.PML(dpml)]
 
 # Size of resonator and waveguide
 r = 6
+sep = 0.5
+w = 1
+pad = 2
 
-# Whispering gallery resonator
 geometry = [mp.Cylinder(material=mp.Medium(epsilon=12),
                         center=mp.Vector3(),
                         radius=r,
-                        height=mp.inf)]
+                        height=mp.inf),  # Whispering gallery resonator
+            mp.Block(mp.Vector3(w, mp.inf, mp.inf),
+                     material=mp.Medium(epsilon=12),
+                     center=mp.Vector3(-(r + sep + w / 2), 0, 0)
+                     )
+            ]
 
 # Source Wavelength
 wvln = 1.538  # micrometers
