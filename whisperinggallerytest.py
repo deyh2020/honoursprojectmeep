@@ -10,6 +10,7 @@ a = 1  # micrometers
 
 cell = mp.Vector3(16, 16, 0)
 
+# Whispering gallery mode
 geometry = [mp.Cylinder(material=mp.Medium(epsilon=12),
                         center=mp.Vector3(),
                         radius=6,
