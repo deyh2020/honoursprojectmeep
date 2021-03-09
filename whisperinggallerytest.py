@@ -9,17 +9,23 @@ a = 1  # micrometers
 
 resolution = 20  # pixels/um
 
-sx = 20  # size of cell in X direction
-sy = 16  # size of cell in Y direction
+sx = 30  # size of cell in X direction
+sy = 30  # size of cell in Y direction
 cell = mp.Vector3(sx, sy, 0)
 
 # Creating perfectly matched layers
 dpml = 1.0
 pml_layers = [mp.PML(dpml)]
 
+# Source Wavelength
+wvln = 1.538  # micrometers
+
+# Some integer
+m = 30
+
 # Size of resonator and waveguide
-r = 6
-sep = 0
+r = m*wvln/(2*np.pi)
+sep = 0.1
 w = 0.5
 pad = 2
 
@@ -32,9 +38,6 @@ geometry = [mp.Cylinder(material=mp.Medium(epsilon=12),
                      center=mp.Vector3(-(r + sep + w/2), 0, 0)
                      )
             ]
-
-# Source Wavelength
-wvln = 1.538  # micrometers
 
 # Scattering source
 sources = [mp.Source(mp.ContinuousSource(frequency=a/wvln, width=w),
