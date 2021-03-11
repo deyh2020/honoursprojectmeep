@@ -9,8 +9,8 @@ a = 1  # micrometers
 
 resolution = 20  # pixels/um
 
-sx = 30  # size of cell in X direction
-sy = 30  # size of cell in Y direction
+sx = 20  # size of cell in X direction
+sy = 20  # size of cell in Y direction
 cell = mp.Vector3(sx, sy, 0)
 
 # Creating perfectly matched layers
