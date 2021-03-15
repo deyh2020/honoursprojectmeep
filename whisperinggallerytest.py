@@ -26,7 +26,7 @@ m = 30
 # Size of resonator and waveguide
 r = m*wvln/(2*np.pi)
 sep = 0.1
-w = 0.5
+w = 0.1
 pad = 2
 
 geometry = [mp.Cylinder(material=mp.Medium(epsilon=12),
