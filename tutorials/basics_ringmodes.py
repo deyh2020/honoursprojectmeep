@@ -12,14 +12,14 @@ sxy = 2*(r+w+pad+dpml)  # cell size
 c1 = mp.Cylinder(radius=r+w, material=mp.Medium(index=n))
 c2 = mp.Cylinder(radius=r)
 
-fcen = 0.15              # pulse center frequency
+fcen = 0.2              # pulse center frequency
 df = 0.1                 # pulse frequency width
 src = mp.Source(mp.GaussianSource(fcen, fwidth=df), mp.Ez, mp.Vector3(r+0.1))
 
 sim = mp.Simulation(cell_size=mp.Vector3(sxy, sxy),
                     geometry=[c1, c2],
                     sources=[src],
-                    resolution=10,
+                    resolution=20,
                     boundary_layers=[mp.PML(dpml)])
 
 sim.run(mp.at_beginning(mp.output_epsilon),
