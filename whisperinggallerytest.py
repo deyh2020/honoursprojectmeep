@@ -20,6 +20,12 @@ pml_layers = [mp.PML(dpml)]
 # Source Wavelength
 wvln = 1.538  # micrometers
 
+fcen = 1/wvln
+
+complexPerm = 0.101
+realPerm = 12
+cond = 2 * np.pi * fcen * complexPerm/realPerm
+
 # Some integer
 m = 30
 
@@ -29,7 +35,7 @@ sep = 0.1
 w = 0.1
 pad = 2
 
-geometry = [mp.Cylinder(material=mp.Medium(epsilon=12),
+geometry = [mp.Cylinder(material=mp.Medium(epsilon=12, D_conductivity=cond),
                         center=mp.Vector3(),
                         radius=r,
                         height=mp.inf),  # Whispering gallery resonator
@@ -40,7 +46,7 @@ geometry = [mp.Cylinder(material=mp.Medium(epsilon=12),
             ]
 
 # Scattering source
-sources = [mp.Source(mp.ContinuousSource(frequency=a/wvln, width=w),
+sources = [mp.Source(mp.ContinuousSource(frequency=fcen, width=w),
                      component=mp.Ez,
                      center=mp.Vector3(-(r + sep + w/2), -sy/2 + pad),
                      size=mp.Vector3(w, 0))
