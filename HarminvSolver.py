@@ -8,7 +8,7 @@ import numpy as np
 # Characteristic lengthscale
 a = 1  # micrometers
 
-resolution = 10  # pixels/um
+resolution = 20  # pixels/um
 
 # Creating perfectly matched layers
 dpml = 1.0
@@ -18,12 +18,14 @@ pml_layers = [mp.PML(dpml)]
 wvln = 1.538  # micrometers
 
 fcen = 1 / wvln
+# fcen = 0.6494663580009499
+df = 0.03
 
 complexPerm = 0
 realPerm = 12
 cond = 2 * np.pi * fcen * complexPerm / realPerm
 
-# Some integer
+# Integer number of wavelengths around the circumference
 m = 10
 
 # Size of resonator and waveguide
@@ -54,7 +56,7 @@ geometry = [mp.Cylinder(material=mp.Medium(epsilon=12, D_conductivity=cond),
 #           ]
 
 # Scattering Source in resonator
-sources = [mp.Source(mp.ContinuousSource(frequency=fcen),
+sources = [mp.Source(mp.GaussianSource(frequency=fcen, width=df),
                      component=mp.Ez,
                      center=mp.Vector3(-r + 0.1, 0))
            ]
@@ -66,17 +68,8 @@ sim = mp.Simulation(cell_size=cell,
                     resolution=resolution,
                     force_complex_fields=True)
 
-# sim.use_output_directory()
+sim.use_output_directory()
 
-tol = 1e-7
-maxiters = 100
-cwtol = tol * 1e-3
-cwmaxiters = 10000
-L = 20
-
-sim.init_sim()
-eigfreq = sim.solve_eigfreq(tol, maxiters, fcen, cwtol, cwmaxiters, L)
-Q = eigfreq.real / (-2 * eigfreq.imag)
-
-print(eigfreq)
-print(Q)
+sim.run(mp.at_beginning(mp.output_epsilon),
+        mp.after_sources(mp.Harminv(mp.Ez, mp.Vector3(r - 0.1), fcen, df)),
+        until_after_sources=2000)
