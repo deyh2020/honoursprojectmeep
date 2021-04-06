@@ -24,7 +24,7 @@ freq = 1 / wvln
 fcen = freq
 print("Frequency = " + str(fcen))
 # cen = 0.6496971259430409
-df = 0.005
+df = 0.002
 
 # Setting real and complex permitivities, and material loss
 complexPerm = 0
@@ -92,7 +92,7 @@ h = mp.Harminv(mp.Ez, mp.Vector3(- r + 0.1), fcen, df)
 
 sim.run(mp.at_beginning(mp.output_epsilon),
         mp.after_sources(h),
-        until_after_sources=2000)
+        until_after_sources=10000)
 
 eps_data = sim.get_array(center=mp.Vector3(), size=cell, component=mp.Dielectric)
 plt.figure()

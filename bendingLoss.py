@@ -2,7 +2,7 @@
 
 import meep as mp
 import numpy as np
-import scipy as sp
+from scipy import special
 import matplotlib.pyplot as plt
 
 # import matplotlib.pyplot as plt
@@ -26,13 +26,29 @@ complexPerm = 0
 realPerm = 12
 cond = 2 * np.pi * freq * complexPerm / realPerm
 
+# Refractive index and ratio with index outside resonator
+n = np.sqrt(realPerm)
+q = n / 1
+
 # Sweeps over Integer number of wavelengths around the circumference
 maxQs = []
 Rs = []
 
+# radial mode number
+nrad = 1  # Set to 1 to get fundamental whispering gallery modes
+
+# Which zero of the airy function we need
+azs = special.ai_zeros(nrad)[0]
+az = azs[nrad-1]
+
+# Iterating over azimuthal mode numbers, setting r
 for m in np.arange(100, 200, 1):
+    print("m = " + str(m))
     # Size of resonator and waveguide
-    r = m * wvln / (2 * np.pi * np.sqrt(realPerm))
+    r = 1 / (2 * np.pi * freq) * (m + 1 / 2 + az * ((m + 1) / 3) ** (1 / 3)
+                                  - q / np.sqrt(q ** 2 - 1) + 3 * az / (2 ** (2 / 3) * 10 * (m + 1 / 2) ** (1 / 3))
+                                  + q ** 3 * az / (3 * 2 ** (1 / 3) * (q ** 2 - 1) ** (3 / 2) * (m + 1 / 2) ** (3 / 2)))
+    print("Radius = " + str(r))
     sep = 0.1
     w = 0.1
     pad = 2
@@ -52,7 +68,7 @@ for m in np.arange(100, 200, 1):
                 ]
 
     # Free spectral range
-    fsr = 0.1 * 1 / (2 * np.pi * np.sqrt(realPerm) * r)
+    fsr = 0.05 * 1 / (2 * np.pi * np.sqrt(realPerm) * r)
 
     steps = fsr / df
 
@@ -87,7 +103,7 @@ for m in np.arange(100, 200, 1):
 
         sim.run(mp.at_beginning(mp.output_epsilon),
                 mp.after_sources(h),
-                until_after_sources=2000)
+                until_after_sources=10000)
 
         QAtThisSlice = [m.Q for m in h.modes]
         QAtThisR = np.append(QatThisR, QAtThisSlice)
@@ -109,6 +125,7 @@ for m in np.arange(100, 200, 1):
     maxQs = np.append(maxQs, max(QatThisR))
     Rs = np.append(Rs, r)
 
+plt.figure()
 fig1, ax1 = plt.subplots()
 
 ax1.plot(Rs, maxQs)
