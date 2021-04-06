@@ -2,6 +2,7 @@
 
 import meep as mp
 import numpy as np
+import scipy as sp
 import matplotlib.pyplot as plt
 
 # import matplotlib.pyplot as plt
@@ -19,7 +20,7 @@ pml_layers = [mp.PML(dpml)]
 wvln = 1.530  # micrometers
 
 freq = 1 / wvln
-df = 0.002
+df = 0.01
 
 complexPerm = 0
 realPerm = 12
@@ -44,34 +45,34 @@ for m in np.arange(100, 200, 1):
                             center=mp.Vector3(),
                             radius=r,
                             height=mp.inf),  # Whispering gallery resonator
-                mp.Block(mp.Vector3(w, mp.inf, mp.inf),
-                         material=mp.Medium(epsilon=12),
-                         center=mp.Vector3(-(r + sep + w / 2), 0, 0)
-                         )
+                # mp.Block(mp.Vector3(w, mp.inf, mp.inf),
+                #         material=mp.Medium(epsilon=12),
+                #         center=mp.Vector3(-(r + sep + w / 2), 0, 0)
+                #         )
                 ]
 
     # Free spectral range
-    fsr = 0.1 *  1 / (2 * np.pi * np.sqrt(realPerm) * r)
+    fsr = 0.1 * 1 / (2 * np.pi * np.sqrt(realPerm) * r)
 
     steps = fsr / df
 
     # Sweeping narrow gaussians over the FSR to
 
-    QatThisR = []
+    QatThisR = [0]
 
     for fcen in np.arange(freq - fsr, freq + fsr, df / 2):
         # Waveguide Source
-        sources = [mp.Source(mp.GaussianSource(frequency=fcen, width=df),
-                             component=mp.Ez,
-                             center=mp.Vector3(-(r + sep + w / 2), -sy / 2 + pad),
-                             size=mp.Vector3(w, 0))
-                   ]
-
-        # Scattering Source in resonator
         # sources = [mp.Source(mp.GaussianSource(frequency=fcen, width=df),
         #                     component=mp.Ez,
-        #                     center=mp.Vector3(-r + 0.1, 0))
+        #                     center=mp.Vector3(-(r + sep + w / 2), -sy / 2 + pad),
+        #                     size=mp.Vector3(w, 0))
         #           ]
+
+        # Scattering Source in resonator
+        sources = [mp.Source(mp.GaussianSource(frequency=fcen, width=df),
+                             component=mp.Ez,
+                             center=mp.Vector3(-r + 0.1, 0))
+                   ]
 
         sim = mp.Simulation(cell_size=cell,
                             boundary_layers=pml_layers,
@@ -106,7 +107,7 @@ for m in np.arange(100, 200, 1):
 
         sim.reset_meep()
     maxQs = np.append(maxQs, max(QatThisR))
-    Rs = np.append(Rs,r)
+    Rs = np.append(Rs, r)
 
 fig1, ax1 = plt.subplots()
 
