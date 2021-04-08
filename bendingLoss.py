@@ -42,7 +42,7 @@ azs = special.ai_zeros(nrad)[0]
 az = azs[nrad-1]
 
 # Iterating over azimuthal mode numbers, setting r
-for m in np.arange(100, 200, 1):
+for m in np.arange(50, 100, 10):
     print("m = " + str(m))
     # Size of resonator and waveguide
     r = 1 / (2 * np.pi * freq) * (m + 1 / 2 + az * ((m + 1) / 3) ** (1 / 3)
