@@ -22,6 +22,8 @@ fcen = 1 / wvln
 fcen = 0.6496971259430409
 df = 0.002
 
+n = 3.4483 + 1j * 1.0901e-13
+
 # Setting real and complex permitivities, and material loss
 # complexPerm = 0
 # realPerm = 12
