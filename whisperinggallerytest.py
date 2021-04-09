@@ -22,9 +22,15 @@ wvln = 1.538  # micrometers
 
 fcen = 1/wvln
 
-complexPerm = 0.101
-realPerm = 12
-cond = 2 * np.pi * fcen * complexPerm/realPerm
+n = 3.4483 + 1j * 1.0901e-13
+
+# Setting real and complex permitivities, and material loss
+# complexPerm = 0
+# realPerm = 12
+perm = np.power(n, 2)
+complexPerm = np.imag(perm)
+realPerm = np.real(perm)
+cond = 2 * np.pi * fcen * complexPerm / realPerm
 
 # Some integer
 m = 30
@@ -35,7 +41,7 @@ sep = 0.1
 w = 0.1
 pad = 2
 
-geometry = [mp.Cylinder(material=mp.Medium(epsilon=12, D_conductivity=cond),
+geometry = [mp.Cylinder(material=mp.Medium(epsilon=realPerm, D_conductivity=cond),
                         center=mp.Vector3(),
                         radius=r,
                         height=mp.inf),  # Whispering gallery resonator
