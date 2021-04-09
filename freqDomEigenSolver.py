@@ -2,6 +2,7 @@
 
 import meep as mp
 import numpy as np
+from scipy import special
 
 # import matplotlib.pyplot as plt
 
@@ -29,11 +30,24 @@ complexPerm = np.imag(perm)
 realPerm = np.real(perm)
 cond = 2 * np.pi * fcen * complexPerm / realPerm
 
-# Some integer
-m = 10
-
 # Size of resonator and waveguide
-r = m * wvln / (2 * np.pi * np.sqrt(12))
+# Refractive index and ratio with index outside resonator
+n = np.sqrt(realPerm)
+q = n / 1
+
+# Angular mode number
+m = 20
+# Radial mode number
+nrad = 1  # Set to 1 to get fundamental whispering gallery modes
+
+# Which zero of the airy function we need
+azs = special.ai_zeros(nrad)[0]
+az = azs[nrad - 1]
+
+# Size of resonator and waveguide, using schillers approx
+r = 1 / (2 * np.pi * fcen) * (m + 1 / 2 + az * ((m + 1) / 3) ** (1 / 3)
+                              - q / np.sqrt(q ** 2 - 1) + 3 * az / (2 ** (2 / 3) * 10 * (m + 1 / 2) ** (1 / 3))
+                              + q ** 3 * az / (3 * 2 ** (1 / 3) * (q ** 2 - 1) ** (3 / 2) * (m + 1 / 2) ** (3 / 2)))
 sep = 0.1
 w = 0.1
 pad = 2
