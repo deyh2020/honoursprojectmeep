@@ -25,7 +25,7 @@ freq = 1 / wvln
 fcen = freq
 print("Frequency = " + str(fcen))
 # cen = 0.6496971259430409
-df = 0.005
+df = 0.01
 
 n = 3.4483 + 1j * 1.0901e-13
 
@@ -43,7 +43,7 @@ q = n / 1
 
 # Angular mode number
 # Radial mode number
-m = 160
+m = 50
 nrad = 1  # Set to 1 to get fundamental whispering gallery modes
 
 # Which zero of the airy function we need
@@ -59,7 +59,7 @@ sep = 0.1
 w = 0.1
 pad = 2
 
-sr = 2 * (r + pad + dpml)  # size of cell in radial direction
+sr = 2*(r + pad + dpml)  # size of cell in radial direction
 cell = mp.Vector3(sr, 0, 0)
 
 geometry = [mp.Block(material=mp.Medium(epsilon=realPerm, D_conductivity=cond),

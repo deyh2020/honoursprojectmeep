@@ -5,12 +5,11 @@ import numpy as np
 from scipy import special
 import matplotlib.pyplot as plt
 
-# import matplotlib.pyplot as plt
-
 # Characteristic lengthscale
 a = 1  # micrometers
 
 resolution = 20  # pixels/um
+dimensions = mp.CYLINDRICAL
 
 # Creating perfectly matched layers
 dpml = 1.0
@@ -20,7 +19,7 @@ pml_layers = [mp.PML(dpml)]
 wvln = 1.530  # micrometers
 
 freq = 1 / wvln
-df = 0.01
+df = 0.02
 
 complexPerm = 0
 realPerm = 12
@@ -42,7 +41,7 @@ azs = special.ai_zeros(nrad)[0]
 az = azs[nrad-1]
 
 # Iterating over azimuthal mode numbers, setting r
-for m in np.arange(50, 101, 10):
+for m in np.arange(50, 501, 10):
     print("m = " + str(m))
     # Size of resonator and waveguide
     r = 1 / (2 * np.pi * freq) * (m + 1 / 2 + az * ((m + 1) / 3) ** (1 / 3)
@@ -53,18 +52,13 @@ for m in np.arange(50, 101, 10):
     w = 0.1
     pad = 2
 
-    sx = 2 * (r + pad + dpml)  # size of cell in X direction
-    sy = sx  # size of cell in Y direction
-    cell = mp.Vector3(sx, sy, 0)
+    sr = 2*(r + pad + dpml)  # size of cell in radial direction
+    cell = mp.Vector3(sr, 0, 0)
 
-    geometry = [mp.Cylinder(material=mp.Medium(epsilon=12, D_conductivity=cond),
-                            center=mp.Vector3(),
-                            radius=r,
-                            height=mp.inf),  # Whispering gallery resonator
-                # mp.Block(mp.Vector3(w, mp.inf, mp.inf),
-                #         material=mp.Medium(epsilon=12),
-                #         center=mp.Vector3(-(r + sep + w / 2), 0, 0)
-                #         )
+    geometry = [mp.Block(material=mp.Medium(epsilon=realPerm, D_conductivity=cond),
+                         center=mp.Vector3(r / 2, 0, 0),
+                         size=mp.Vector3(r, mp.inf, mp.inf)
+                         )
                 ]
 
     # Free spectral range
@@ -87,7 +81,7 @@ for m in np.arange(50, 101, 10):
         # Scattering Source in resonator
         sources = [mp.Source(mp.GaussianSource(frequency=fcen, width=df),
                              component=mp.Ez,
-                             center=mp.Vector3(-r + 0.1, 0))
+                             center=mp.Vector3(r - 0.1, 0))
                    ]
 
         sim = mp.Simulation(cell_size=cell,
@@ -95,12 +89,14 @@ for m in np.arange(50, 101, 10):
                             geometry=geometry,
                             sources=sources,
                             resolution=resolution,
+                            dimensions=dimensions,
+                            m=int(m),
                             force_complex_fields=False,
                             Courant=0.5)
 
         sim.use_output_directory()
 
-        h = mp.Harminv(mp.Ez, mp.Vector3(- r + 0.1), fcen, df)
+        h = mp.Harminv(mp.Ez, mp.Vector3(r - 0.1), fcen, df)
 
         sim.run(mp.at_beginning(mp.output_epsilon),
                 mp.after_sources(h),
@@ -108,25 +104,12 @@ for m in np.arange(50, 101, 10):
 
         QAtThisSlice = [m.Q for m in h.modes]
         QAtThisR = np.append(QatThisR, QAtThisSlice)
-
-        eps_data = sim.get_array(center=mp.Vector3(), size=cell, component=mp.Dielectric)
-        plt.figure()
-        plt.imshow(eps_data.transpose(), interpolation='spline36', cmap='binary')
-        plt.axis('off')
-        plt.show()
-
-        ez_data = sim.get_array(center=mp.Vector3(), size=cell, component=mp.Ez)
-        plt.figure()
-        plt.imshow(eps_data.transpose(), interpolation='spline36', cmap='binary')
-        plt.imshow(ez_data.transpose(), interpolation='spline36', cmap='RdBu', alpha=0.9)
-        plt.axis('off')
-        plt.show()
-
         sim.reset_meep()
-    maxQs = np.append(maxQs, max(QatThisR))
+    maxQatThisR = max(QAtThisR)
+    maxQs = np.append(maxQs, maxQatThisR)
+    print(maxQs)
     Rs = np.append(Rs, r)
 
-plt.figure()
 fig1, ax1 = plt.subplots()
 
 ax1.plot(Rs, maxQs)
@@ -134,4 +117,5 @@ ax1.plot(Rs, maxQs)
 ax1.set_xlabel("R (micrometers)")
 ax1.set_ylabel("Q")
 ax1.set_title("Q Factor of 2D WGM near 1530nm vs Radius")
+
 plt.show()
