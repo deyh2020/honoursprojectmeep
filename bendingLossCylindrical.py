@@ -19,7 +19,7 @@ pml_layers = [mp.PML(dpml)]
 wvln = 1.530  # micrometers
 
 freq = 1 / wvln
-df = 0.02
+df = 0.001
 
 complexPerm = 0
 realPerm = 12
@@ -41,7 +41,7 @@ azs = special.ai_zeros(nrad)[0]
 az = azs[nrad-1]
 
 # Iterating over azimuthal mode numbers, setting r
-for m in np.arange(50, 501, 10):
+for m in np.arange(50, 251, 10):
     print("m = " + str(m))
     # Size of resonator and waveguide
     r = 1 / (2 * np.pi * freq) * (m + 1 / 2 + az * ((m + 1) / 3) ** (1 / 3)
@@ -52,7 +52,7 @@ for m in np.arange(50, 501, 10):
     w = 0.1
     pad = 2
 
-    sr = 2*(r + pad + dpml)  # size of cell in radial direction
+    sr = (r + pad + dpml)  # size of cell in radial direction
     cell = mp.Vector3(sr, 0, 0)
 
     geometry = [mp.Block(material=mp.Medium(epsilon=realPerm, D_conductivity=cond),
@@ -62,15 +62,16 @@ for m in np.arange(50, 501, 10):
                 ]
 
     # Free spectral range
-    fsr = 0.05 * 1 / (2 * np.pi * np.sqrt(realPerm) * r)
+    fsr = 2 / (2 * np.pi * np.sqrt(realPerm) * r)
 
     steps = fsr / df
 
     # Sweeping narrow gaussians over the FSR to
 
     QatThisR = [0]
-
-    for fcen in np.arange(freq - fsr, freq + fsr, df / 2):
+    frequencies = np.arange(freq - fsr, freq + fsr, df / 2)
+    frequencies = np.append(frequencies, freq + fsr)
+    for fcen in frequencies:
         # Waveguide Source
         # sources = [mp.Source(mp.GaussianSource(frequency=fcen, width=df),
         #                     component=mp.Ez,
@@ -92,7 +93,7 @@ for m in np.arange(50, 501, 10):
                             dimensions=dimensions,
                             m=int(m),
                             force_complex_fields=False,
-                            Courant=0.5)
+                            Courant=0.1)
 
         sim.use_output_directory()
 
@@ -103,19 +104,19 @@ for m in np.arange(50, 501, 10):
                 until_after_sources=10000)
 
         QAtThisSlice = [m.Q for m in h.modes]
-        QAtThisR = np.append(QatThisR, QAtThisSlice)
+        QatThisR = np.append(QatThisR, QAtThisSlice)
         sim.reset_meep()
-    maxQatThisR = max(QAtThisR)
+    maxQatThisR = max(QatThisR)
     maxQs = np.append(maxQs, maxQatThisR)
     print(maxQs)
     Rs = np.append(Rs, r)
 
-fig1, ax1 = plt.subplots()
+    fig1, ax1 = plt.subplots()
 
-ax1.plot(Rs, maxQs)
+    ax1.plot(Rs, maxQs)
 
-ax1.set_xlabel("R (micrometers)")
-ax1.set_ylabel("Q")
-ax1.set_title("Q Factor of 2D WGM near 1530nm vs Radius")
+    ax1.set_xlabel("R (micrometers)")
+    ax1.set_ylabel("Q")
+    ax1.set_title("Q Factor of 2D WGM near 1530nm vs Radius")
 
-plt.show()
+    plt.show()
