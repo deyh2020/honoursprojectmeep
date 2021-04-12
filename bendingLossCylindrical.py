@@ -19,7 +19,7 @@ pml_layers = [mp.PML(dpml)]
 wvln = 1.530  # micrometers
 
 freq = 1 / wvln
-df = 0.001
+df = 0.002
 
 complexPerm = 0
 realPerm = 12
@@ -29,24 +29,32 @@ cond = 2 * np.pi * freq * complexPerm / realPerm
 n = np.sqrt(realPerm)
 q = n / 1
 
-# Sweeps over Integer number of wavelengths around the circumference
-maxQs = []
-Rs = []
-
 # radial mode number
 nrad = 1  # Set to 1 to get fundamental whispering gallery modes
 
 # Which zero of the airy function we need
 azs = special.ai_zeros(nrad)[0]
-az = azs[nrad-1]
+az = azs[nrad - 1]
+
+
+def m2r(x):
+    return 1 / (2 * np.pi * freq) * (x + 1 / 2 + az * ((x + 1) / 3) ** (1 / 3) - q / np.sqrt(q ** 2 - 1)
+                                     + 3 * az / (2 ** (2 / 3) * 10 * (x + 1 / 2) ** (1 / 3)) + q ** 3 * az
+                                     / (3 * 2 ** (1 / 3) * (q ** 2 - 1) ** (3 / 2) * (x + 1 / 2) ** (3 / 2)))
+
+
+maxQs = []
+Rs = []
+Ms = []
 
 # Iterating over azimuthal mode numbers, setting r
 for m in np.arange(50, 251, 10):
     print("m = " + str(m))
     # Size of resonator and waveguide
-    r = 1 / (2 * np.pi * freq) * (m + 1 / 2 + az * ((m + 1) / 3) ** (1 / 3)
-                                  - q / np.sqrt(q ** 2 - 1) + 3 * az / (2 ** (2 / 3) * 10 * (m + 1 / 2) ** (1 / 3))
-                                  + q ** 3 * az / (3 * 2 ** (1 / 3) * (q ** 2 - 1) ** (3 / 2) * (m + 1 / 2) ** (3 / 2)))
+    # r = 1 / (2 * np.pi * freq) * (m + 1 / 2 + az * ((m + 1) / 3) ** (1 / 3) - q /
+    # np.sqrt(q ** 2 - 1) + 3 * az / (2 ** (2 / 3) * 10 * (m + 1 / 2) ** (1 / 3)) + q ** 3 * az / (3 * 2 ** (1 / 3) *
+    # (q ** 2 - 1) ** (3 / 2) * (m + 1 / 2) ** (3 / 2)))
+    r = m2r(m)
     print("Radius = " + str(r))
     sep = 0.1
     w = 0.1
@@ -62,7 +70,7 @@ for m in np.arange(50, 251, 10):
                 ]
 
     # Free spectral range
-    fsr = 2 / (2 * np.pi * np.sqrt(realPerm) * r)
+    fsr = 1 / (2 * np.pi * np.sqrt(realPerm) * r)
 
     steps = fsr / df
 
@@ -93,7 +101,7 @@ for m in np.arange(50, 251, 10):
                             dimensions=dimensions,
                             m=int(m),
                             force_complex_fields=False,
-                            Courant=0.1)
+                            Courant=0.5)
 
         sim.use_output_directory()
 
@@ -110,6 +118,7 @@ for m in np.arange(50, 251, 10):
     maxQs = np.append(maxQs, maxQatThisR)
     print(maxQs)
     Rs = np.append(Rs, r)
+    Ms = np.append(Ms, m)
 
     fig1, ax1 = plt.subplots()
 
@@ -118,5 +127,17 @@ for m in np.arange(50, 251, 10):
     ax1.set_xlabel("R (micrometers)")
     ax1.set_ylabel("Q")
     ax1.set_title("Q Factor of 2D WGM near 1530nm vs Radius")
+
+
+    def forward(x):
+        return np.interp(x, Rs, Ms)
+
+
+    def inverse(x):
+        return np.interp(x, Ms, Rs)
+
+
+    secax = ax1.secondary_xaxis('top', functions=(forward, inverse))
+    secax.set_xlabel('Azimuthal Mode Number')
 
     plt.show()
