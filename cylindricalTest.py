@@ -43,23 +43,36 @@ q = n / 1
 
 # Angular mode number
 # Radial mode number
-m = 50
+m = 70
 nrad = 1  # Set to 1 to get fundamental whispering gallery modes
 
 # Which zero of the airy function we need
 azs = special.ai_zeros(nrad)[0]
 az = azs[nrad - 1]
 
+def m2r(x):
+    return 1 / (2 * np.pi * freq) * (x + 1 / 2 + az * ((x + 1 / 2) / 2) ** (1 / 3) - q / np.sqrt(q ** 2 - 1)
+                                     + 3 * az / (2 ** (2 / 3) * 10 * (x + 1 / 2) ** (1 / 3)) + q ** 3 * az
+                                     / (3 * 2 ** (1 / 3) * (q ** 2 - 1) ** (3 / 2) * (x + 1 / 2) ** (2 / 3)))
+
+def m2rvar(x):
+    return 1 / (2 * np.pi * freq) * (x + az * (x / 2) ** (1 / 3) - q / np.sqrt(q ** 2 - 1)
+                                     + 3 * az / (2 ** (2 / 3) * 10 * x ** (1 / 3)) + q ** 3 * az
+                                     / (3 * 2 ** (1 / 3) * (q ** 2 - 1) ** (3 / 2) * x ** (2 / 3)))
+
 # Size of resonator and waveguide, using schillers approx
+"""
 r = 1 / (2 * np.pi * freq) * (m + 1 / 2 + az * ((m + 1) / 3) ** (1 / 3)
                               - q / np.sqrt(q ** 2 - 1) + 3 * az / (2 ** (2 / 3) * 10 * (m + 1 / 2) ** (1 / 3))
                               + q ** 3 * az / (3 * 2 ** (1 / 3) * (q ** 2 - 1) ** (3 / 2) * (m + 1 / 2) ** (3 / 2)))
+"""
+r = m2rvar(m)
 print("Radius = " + str(r))
 sep = 0.1
 w = 0.1
 pad = 2
 
-sr = 2*(r + pad + dpml)  # size of cell in radial direction
+sr = (r + pad + dpml)  # size of cell in radial direction
 cell = mp.Vector3(sr, 0, 0)
 
 geometry = [mp.Block(material=mp.Medium(epsilon=realPerm, D_conductivity=cond),
@@ -97,7 +110,7 @@ h = mp.Harminv(mp.Ez, mp.Vector3(r - 0.1), fcen, df)
 
 sim.run(mp.at_beginning(mp.output_epsilon),
         mp.after_sources(h),
-        until_after_sources=10000)
+        until_after_sources=20000)
 
 QAtThisR = [m.Q for m in h.modes]
 

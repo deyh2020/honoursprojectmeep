@@ -115,7 +115,7 @@ for m in np.arange(50, 251, 10):
 
         sim.run(mp.at_beginning(mp.output_epsilon),
                 mp.after_sources(h),
-                until_after_sources=10000)
+                until_after_sources=10000*m/50)
 
         QAtThisSlice = [m.Q for m in h.modes]
         QatThisR = np.append(QatThisR, QAtThisSlice)

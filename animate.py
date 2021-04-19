@@ -4,7 +4,7 @@ import os
 from tables import *
 
 # Name of the python script, don't add .py on the end
-filename = "whisperinggallerytest"  # input("Script Name: ")
+filename = "schillersApproxTest"  # input("Script Name: ")
 
 # Uses pytables to determine the number of time slots
 h5file = open_file(filename + "-out/" + filename + "-ez.h5", mode="r")

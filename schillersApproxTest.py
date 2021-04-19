@@ -23,8 +23,8 @@ wvln = 1.538  # micrometers
 freq = 1 / wvln
 fcen = freq
 print("Frequency = " + str(fcen))
-# cen = 0.6496971259430409
-df = 0.002
+fcen = 0.6466121511505816
+df = 0.0013
 
 n = 3.4483 + 1j * 1.0901e-13
 
@@ -49,10 +49,24 @@ nrad = 1  # Set to 1 to get fundamental whispering gallery modes
 azs = special.ai_zeros(nrad)[0]
 az = azs[nrad - 1]
 
+def m2r(x):
+    return 1 / (2 * np.pi * freq) * (x + 1 / 2 + az * ((x + 1 / 2) / 2) ** (1 / 3) - q / np.sqrt(q ** 2 - 1)
+                                     + 3 * az / (2 ** (2 / 3) * 10 * (x + 1 / 2) ** (1 / 3)) + q ** 3 * az
+                                     / (3 * 2 ** (1 / 3) * (q ** 2 - 1) ** (3 / 2) * (x + 1 / 2) ** (2 / 3)))
+
+
+def m2rvar(x):
+    return 1 / (2 * np.pi * freq) * (x + az * (x / 2) ** (1 / 3) - q / np.sqrt(q ** 2 - 1)
+                                     + 3 * az / (2 ** (2 / 3) * 10 * x ** (1 / 3)) + q ** 3 * az
+                                     / (3 * 2 ** (1 / 3) * (q ** 2 - 1) ** (3 / 2) * x ** (2 / 3)))
+
 # Size of resonator and waveguide, using schillers approx
+"""
 r = 1 / (2 * np.pi * freq) * (m + 1 / 2 + az * ((m + 1) / 3) ** (1 / 3)
                               - q / np.sqrt(q ** 2 - 1) + 3 * az / (2 ** (2 / 3) * 10 * (m + 1 / 2) ** (1 / 3))
                               + q ** 3 * az / (3 * 2 ** (1 / 3) * (q ** 2 - 1) ** (3 / 2) * (m + 1 / 2) ** (3 / 2)))
+"""
+r = m2rvar(m)
 print("Radius = " + str(r))
 sep = 0.1
 w = 0.1
@@ -91,13 +105,14 @@ sim = mp.Simulation(cell_size=cell,
                     sources=sources,
                     resolution=resolution,
                     force_complex_fields=False,
-                    Courant=0.5
+                    Courant=0.4
                     )
 
 sim.use_output_directory()
 h = mp.Harminv(mp.Ez, mp.Vector3(- r + 0.1), fcen, df)
 
 sim.run(mp.at_beginning(mp.output_epsilon),
+#        mp.to_appended("ez", mp.at_every(0.6, mp.output_efield_z)),
         mp.after_sources(h),
         until_after_sources=10000)
 
