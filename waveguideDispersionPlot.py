@@ -8,8 +8,8 @@ neff2 = np.array([0.28062,0.40801,0.36254,0.27022,0.24156,0.14183,0.12626,0.1677
 
 fig1, ax1 = plt.subplots()
 
-ax1.plot(wvln, neff1, label='Excited Face')
-ax1.plot(wvln, neff2, label='Non-excited Face')
+ax1.plot(wvln, neff1, 'b.', label='Excited Face')
+ax1.plot(wvln, neff2, 'b.', label='Non-excited Face')
 
 ax1.set_xlabel("Wavelength (nm)")
 ax1.set_ylabel("Effective index")
