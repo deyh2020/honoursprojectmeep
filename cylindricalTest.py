@@ -121,3 +121,20 @@ QAtThisR = [m.Q for m in h.modes]
 
 print(QAtThisR)
 print(max(QAtThisR))
+
+eps_data = sim.get_array(center=mp.Vector3(), size=cell, component=mp.Dielectric)
+plt.figure()
+plt.imshow(eps_data.transpose(), interpolation='spline36', cmap='binary')
+plt.axis('off')
+plt.show()
+
+ez_data = sim.get_array(center=mp.Vector3(), size=cell, component=mp.Ez)
+plt.figure()
+plt.imshow(eps_data.transpose(), interpolation='spline36', cmap='binary')
+plt.imshow(ez_data.transpose(), interpolation='spline36', cmap='RdBu', alpha=0.9)
+plt.axis('off')
+plt.show()
+
+#plt.figure()
+#sim.plot2D(fields=mp.Ez,  field_parameters={'alpha':0.6}, eps_parameters={'alpha':0.6})
+#plt.show()
