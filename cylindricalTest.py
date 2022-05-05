@@ -27,7 +27,8 @@ print("Frequency = " + str(fcen))
 # cen = 0.6496971259430409
 df = 0.01
 
-n = 3.4483 + 1j * 1.0901e-13
+# n = 3.4483 + 1j * 1.0901e-13
+n = 1.44
 
 # Setting real and complex permitivities, and material loss
 # complexPerm = 0
@@ -35,7 +36,7 @@ n = 3.4483 + 1j * 1.0901e-13
 perm = np.power(n, 2)
 complexPerm = np.imag(perm)
 realPerm = np.real(perm)
-cond = 2 * np.pi * freq * complexPerm / realPerm
+cond = 2 * np.pi * fcen * complexPerm / realPerm
 
 # Refractive index and ratio with index outside resonator
 n = np.sqrt(realPerm)
@@ -43,7 +44,7 @@ q = n / 1
 
 # Angular mode number
 # Radial mode number
-m = 70
+m = 5
 nrad = 1  # Set to 1 to get fundamental whispering gallery modes
 
 # Which zero of the airy function we need
@@ -89,7 +90,12 @@ geometry = [mp.Block(material=mp.Medium(epsilon=realPerm, D_conductivity=cond),
 #           ]
 
 # Scattering Source in resonator
-sources = [mp.Source(mp.GaussianSource(frequency=fcen, width=df),
+#sources = [mp.Source(mp.GaussianSource(frequency=fcen, width=df),
+#                     component=mp.Ez,
+#                     center=mp.Vector3(r - 0.1, 0))
+#           ]
+
+sources = [mp.Source(mp.ContinuousSource(frequency=fcen),
                      component=mp.Ez,
                      center=mp.Vector3(r - 0.1, 0))
            ]
@@ -108,9 +114,14 @@ sim = mp.Simulation(cell_size=cell,
 sim.use_output_directory()
 h = mp.Harminv(mp.Ez, mp.Vector3(r - 0.1), fcen, df)
 
-sim.run(mp.at_beginning(mp.output_epsilon),
-        mp.after_sources(h),
-        until_after_sources=20000)
+#sim.run(mp.at_beginning(mp.output_epsilon),
+#        mp.after_sources(h),
+#        until_after_sources=20000)
+
+sim.run(mp.in_volume(mp.Volume(center=mp.Vector3(), size=mp.Vector3(2 * sr)),
+                     mp.at_beginning(mp.output_epsilon),
+                     mp.to_appended("ez", mp.at_every(1 / fcen / 20, mp.output_efield_z))),
+        until=5 / fcen)
 
 QAtThisR = [m.Q for m in h.modes]
 
@@ -138,3 +149,5 @@ plt.show()
 #plt.figure()
 #sim.plot2D(fields=mp.Ez,  field_parameters={'alpha':0.6}, eps_parameters={'alpha':0.6})
 #plt.show()
+
+#h5topng -S 2 -Zc dkbluered -C cylindricalTest-eps-020000.12.h5  cylindricalTest-ez.h5
